@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- KaTeX (local) -->
+  <link rel="stylesheet" href="katex.min.css">
+  <script src="katex.min.js"></script>
+  <script src="auto-render.min.js"></script>
+
+  <!-- Mermaid (local) -->
+  <script src="mermaid.min.js"></script>
+  <script>
+    if (typeof mermaid === 'undefined' && typeof __esbuild_esm_mermaid_nm !== 'undefined') {
+      window.mermaid = __esbuild_esm_mermaid_nm.mermaid;
+    }
+  </script>
+
+  <!-- ECharts (local) -->
+  <script src="echarts.min.js"></script>
+
+  <style>
+    /* ── Apple HIG Design Tokens ───────────────────────────────────────────── */
+    :root {
+      /* Backgrounds */
+      --bg:                #ffffff;
+      --surface:           #f5f5f7;
+      /* Text */
+      --text:              #1d1d1f;
+      --text-secondary:    #6e6e73;
+      /* Code + borders */
+      --code-bg:           #f5f5f7;
+      --code-border:       #e5e5ea;
+      --border:            #d2d2d7;
+      /* Apple Blue */
+      --link:              #0071e3;
+      --link-hover:        #0077ed;
+      /* Blockquote */
+      --blockquote-border: #0071e3;
+      --blockquote-bg:     rgba(0, 113, 227, 0.06);
+      --blockquote-color:  #3a3a3c;
+      /* Table */
+      --table-header-bg:   #f5f5f7;
+      --table-row-alt:     rgba(0, 0, 0, 0.025);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:                #1c1c1e;
+        --surface:           #2c2c2e;
+        --text:              #f5f5f7;
+        --text-secondary:    #98989d;
+        --code-bg:           #2c2c2e;
+        --code-border:       #3a3a3c;
+        --border:            #38383a;
+        --link:              #2997ff;
+        --link-hover:        #409cff;
+        --blockquote-border: #2997ff;
+        --blockquote-bg:     rgba(41, 151, 255, 0.08);
+        --blockquote-color:  #aeaeb2;
+        --table-header-bg:   #2c2c2e;
+        --table-row-alt:     rgba(255, 255, 255, 0.03);
+      }
+
+      .mermaid svg {
+        background: transparent !important;
+      }
+    }
+
+    /* ── Reset ─────────────────────────────────────────────────────────────── */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Base ──────────────────────────────────────────────────────────────── */
+    body {
+      font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text);
+      background: var(--bg);
+      padding: 12px 24px 80px;
+      max-width: 860px;
+      margin: 0 auto;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    /* Text selection — Apple Blue tint */
+    ::selection {
+      background: rgba(0, 113, 227, 0.18);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      ::selection {
+        background: rgba(41, 151, 255, 0.22);
+      }
+    }
+
+    #truemarkdown-content > *:first-child {
+      margin-top: 0 !important;
+    }
+
+    /* ── Typography — Headings ──────────────────────────────────────────────── */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+      color: var(--text);
+      line-height: 1.25;
+      scroll-margin-top: 24px;
+    }
+
+    h1 {
+      font-size: 2em;
+      font-weight: 700;
+      letter-spacing: -0.022em;
+      margin: 1.6em 0 0.5em;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      font-weight: 700;
+      letter-spacing: -0.018em;
+      margin: 1.5em 0 0.45em;
+      padding-bottom: 0.3em;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h3 {
+      font-size: 1.2em;
+      font-weight: 600;
+      letter-spacing: -0.014em;
+      margin: 1.4em 0 0.4em;
+    }
+
+    h4 {
+      font-size: 1.05em;
+      font-weight: 600;
+      margin: 1.2em 0 0.35em;
+    }
+
+    h5, h6 {
+      font-size: 0.95em;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin: 1em 0 0.3em;
+    }
+
+    /* ── Paragraphs & inline ────────────────────────────────────────────────── */
+    p {
+      margin: 0.85em 0;
+    }
+
+    strong {
+      font-weight: 600;
+    }
+
+    /* ── Links ──────────────────────────────────────────────────────────────── */
+    a {
+      color: var(--link);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    a:hover {
+      color: var(--link-hover);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    /* ── Code ───────────────────────────────────────────────────────────────── */
+    code {
+      font-family: "SF Mono", ui-monospace, Menlo, Monaco, "Courier New", monospace;
+      font-size: 0.865em;
+      background: var(--code-bg);
+      color: var(--text);
+      padding: 0.15em 0.38em;
+      border-radius: 5px;
+      border: 1px solid var(--code-border);
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--code-border);
+      border-left: 3px solid var(--link);
+      border-radius: 10px;
+      padding: 16px 20px;
+      overflow-x: auto;
+      margin: 1.2em 0;
+    }
+
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.865em;
+      line-height: 1.65;
+    }
+
+    /* ── Blockquote ─────────────────────────────────────────────────────────── */
+    blockquote {
+      border-left: 4px solid var(--blockquote-border);
+      background: var(--blockquote-bg);
+      border-radius: 0 8px 8px 0;
+      margin: 1.2em 0;
+      padding: 0.7em 1.1em;
+      color: var(--blockquote-color);
+    }
+
+    blockquote > p {
+      margin: 0;
+    }
+
+    /* ── Lists ──────────────────────────────────────────────────────────────── */
+    ul, ol {
+      margin: 0.6em 0 0.6em 1.6em;
+    }
+
+    li {
+      margin: 0.3em 0;
+      line-height: 1.65;
+    }
+
+    li input[type=checkbox] {
+      margin-right: 6px;
+      accent-color: var(--link);
+    }
+
+    /* ── Tables ─────────────────────────────────────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.2em 0;
+      font-size: 0.93em;
+    }
+
+    th, td {
+      padding: 9px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: var(--table-header-bg);
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 0.875em;
+      letter-spacing: 0.01em;
+      text-transform: uppercase;
+      border-bottom: 2px solid var(--border);
+    }
+
+    tr:nth-child(even) td {
+      background: var(--table-row-alt);
+    }
+
+    tr:hover td {
+      background: color-mix(in srgb, var(--link) 5%, transparent);
+      transition: background 0.1s ease;
+    }
+
+    /* ── HR ─────────────────────────────────────────────────────────────────── */
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2.2em 0;
+    }
+
+    /* ── Images ─────────────────────────────────────────────────────────────── */
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+
+    /* ── Mermaid ─────────────────────────────────────────────────────────────── */
+    .mermaid {
+      margin: 1.2em 0;
+      text-align: center;
+    }
+
+    .mermaid svg {
+      max-width: 100%;
+    }
+
+    /* ── ECharts ─────────────────────────────────────────────────────────────── */
+    .echarts-container {
+      width: 100%;
+      height: 400px;
+      margin: 1.2em 0;
+    }
+
+    /* ── KaTeX ───────────────────────────────────────────────────────────────── */
+    .katex-display {
+      margin: 1.2em 0;
+      overflow-x: auto;
+    }
+
+    /* ── Scrollbar — thin overlay style (Apple-like) ─────────────────────────── */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(128, 128, 128, 0.3);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(128, 128, 128, 0.55);
+    }
+
+    /* block wrappers are targeted via JS — no extra style needed */
+
+    /* ── Search highlights ──────────────────────────────────────────────────── */
+    mark.search-match {
+      background-color: rgba(255, 214, 0, 0.35);
+      color: inherit;
+      border-radius: 2px;
+      padding: 0;
+    }
+
+    mark.search-match.current {
+      background-color: rgba(255, 149, 0, 0.55);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      mark.search-match {
+        background-color: rgba(255, 214, 0, 0.25);
+      }
+      mark.search-match.current {
+        background-color: rgba(255, 149, 0, 0.45);
+      }
+    }
+  </style>
+</head>
+
+<body id="truemarkdown-body">
+  <div id="truemarkdown-content"></div>
+
+  <script>
+    // ── Mermaid init ────────────────────────────────────────────────────────────
+    if (typeof mermaid !== 'undefined') {
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default',
+        securityLevel: 'loose'
+      });
+    } else {
+      // If undefined, push a visible red box so we physically see the failure
+      document.addEventListener("DOMContentLoaded", () => {
+        document.body.insertAdjacentHTML('afterbegin', '<div style="background: red; color: white; padding: 10px; font-weight: bold;">MERMAID IS UNDEFINED OR FAILED TO LOAD</div>');
+      });
+    }
+
+    // ── ECharts renderer ───────────────────────────────────────────────────────
+    function renderECharts() {
+      document.querySelectorAll('.echarts[data-config]').forEach(el => {
+        if (el._chart) return;
+        try {
+          const chart = echarts.init(el);
+          const config = new Function('return ' + el.dataset.config)();
+          chart.setOption(config);
+          el._chart = chart;
+        } catch (e) { el.textContent = 'ECharts error: ' + e.message; }
+      });
+    }
+
+    // ── KaTeX renderer ─────────────────────────────────────────────────────────
+    function renderKaTeX() {
+      if (typeof katex === 'undefined') {
+        // Show debug banner so we can tell katex didn't load
+        if (!document.getElementById('math-debug-banner')) {
+          document.body.insertAdjacentHTML('afterbegin',
+            '<div id="math-debug-banner" style="background:orange;color:black;padding:8px;font-weight:bold">⚠️ KaTeX is not loaded</div>');
+        }
+        return;
+      }
+
+      // Render block math (```math blocks) via direct katex.render()
+      document.querySelectorAll('.math-block[data-expr]').forEach(el => {
+        if (el._katexRendered) return;
+        try {
+          katex.render(el.dataset.expr, el, { displayMode: true, throwOnError: false });
+          el._katexRendered = true;
+        } catch (e) {
+          el.textContent = 'Math error: ' + e.message;
+        }
+      });
+
+      // Render inline math (`math ...` syntax) via direct katex.render()
+      document.querySelectorAll('.math-inline[data-expr]').forEach(el => {
+        if (el._katexRendered) return;
+        try {
+          katex.render(el.dataset.expr, el, { displayMode: false, throwOnError: false });
+          el._katexRendered = true;
+        } catch (e) {
+          el.textContent = 'Math error: ' + e.message;
+        }
+      });
+
+      // Also run auto-render for legacy $...$ and $$...$$ delimiters in plain text
+      if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(document.getElementById('truemarkdown-content'), {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false },
+            { left: '\\[', right: '\\]', display: true },
+            { left: '\\(', right: '\\)', display: false }
+          ],
+          throwOnError: false
+        });
+      }
+    }
+
+    // ── Mermaid renderer ────────────────────────────────────────────────────────
+    async function renderMermaid() {
+      if (typeof mermaid === 'undefined') return;
+      const els = document.querySelectorAll('.mermaid:not([data-processed])');
+      for (const el of els) {
+        try {
+          const id = 'mermaid-' + Math.random().toString(36).slice(2);
+          const { svg } = await mermaid.render(id, el.textContent.trim());
+          el.innerHTML = svg;
+          el.setAttribute('data-processed', 'true');
+        } catch (e) {
+          el.innerHTML = '<pre style="color:red">Mermaid error:\n' + e.message + '</pre>';
+        }
+      }
+    }
+
+    // ── Post-render (run all renderers) ────────────────────────────────────────
+    async function postRender() {
+      await renderMermaid();
+      renderECharts();
+      renderKaTeX();
+    }
+
+    // ── Full content replace (initial load) ────────────────────────────────────
+    async function setFullContent(html) {
+      const el = document.getElementById('truemarkdown-content');
+      el.innerHTML = html;
+      await postRender();
+    }
+
+    // ── Incremental block update ────────────────────────────────────────────────
+    async function updateBlock(blockId, html) {
+      let el = document.querySelector(`[data-block-id="${blockId}"]`);
+      if (el) {
+        el.outerHTML = html;
+      } else {
+        // New block — append at end
+        document.getElementById('truemarkdown-content').insertAdjacentHTML('beforeend', html);
+      }
+      await postRender();
+    }
+
+    // ── TOC scroll sync ────────────────────────────────────────────────────────
+    // scrollToBlock: smooth, used by TOC click navigation.
+    function scrollToBlock(blockId) {
+      const el = document.querySelector(`[data-block-id="${blockId}"], #${blockId}`);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ── Scroll sync (one-way: editor → preview) ───────────────────────────────
+    // Ratio-based proportional scrolling with lerp animation.
+    // A single shared rAF loop drives the animation.
+    // Each frame: new_y = current_y + (target_y - current_y) * FACTOR
+    //   → exponential deceleration: fast when far, smooth when close.
+    //   → when editor keeps scrolling, target updates continuously so the
+    //     preview "chases" it at a speed proportional to scroll velocity.
+    var _syncTarget = null;
+    var _syncRafId  = null;
+    var SYNC_LERP   = 0.25;   // 25% per frame ≈ ~10 frames to arrive (60fps ≈ 167ms)
+
+    function setScrollRatio(ratio) {
+      // Re-read scrollHeight at call time — async content (Mermaid, KaTeX) may
+      // have changed the page height since the last call.
+      var totalH = document.documentElement.scrollHeight;
+      var viewH  = window.innerHeight;
+      var maxScroll = totalH - viewH;
+      if (maxScroll <= 0) return;
+
+      _syncTarget = ratio * maxScroll;
+      // Start the rAF loop if not already running
+      if (!_syncRafId) {
+        _syncRafId = requestAnimationFrame(_syncStep);
+      }
+    }
+
+    function _syncStep() {
+      if (_syncTarget === null) { _syncRafId = null; return; }
+      var current = window.pageYOffset;
+      var delta   = _syncTarget - current;
+      if (Math.abs(delta) < 0.5) {
+        // Close enough — snap and stop
+        window.scrollTo(0, _syncTarget);
+        _syncTarget = null;
+        _syncRafId  = null;
+        return;
+      }
+      window.scrollTo(0, current + delta * SYNC_LERP);
+      _syncRafId = requestAnimationFrame(_syncStep);
+    }
+
+    // ── Dark mode watch ────────────────────────────────────────────────────────
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      if (typeof mermaid !== 'undefined') {
+        mermaid.initialize({ theme: e.matches ? 'dark' : 'default' });
+      }
+    });
+
+    // ── External link handler ─────────────────────────────────────────────────
+    // Intercept ALL link clicks in capture phase — fires before WKWebView navigates.
+    // Sends http/https URLs to Swift via window.webkit.messageHandlers.openExternal
+    // so they open in the system browser instead of inside the preview panel.
+    document.addEventListener('click', function (e) {
+      const anchor = e.target.closest('a[href]');
+      if (!anchor) return;
+      const href = anchor.href;   // fully-resolved URL string
+      if (href && (href.startsWith('http://') || href.startsWith('https://'))) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        try {
+          window.webkit.messageHandlers.openExternal.postMessage(href);
+        } catch (_) { /* handler not registered in this context */ }
+      }
+    }, true /* capture phase */);
+
+    // ── In-page search ─────────────────────────────────────────────────────────
+    var _searchMatches = [];
+
+    function highlightSearch(query, caseSensitive) {
+      clearSearchHighlight();
+      if (!query) return 0;
+
+      var flags = caseSensitive ? 'g' : 'gi';
+      var regex;
+      try {
+        // Escape regex special chars in query
+        var escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        regex = new RegExp(escaped, flags);
+      } catch (e) { return 0; }
+
+      var content = document.getElementById('truemarkdown-content');
+      var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, null);
+      var textNodes = [];
+      while (walker.nextNode()) textNodes.push(walker.currentNode);
+
+      _searchMatches = [];
+      textNodes.forEach(function(node) {
+        var parent = node.parentNode;
+        if (!parent || parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE') return;
+        var text = node.textContent;
+        var match;
+        var fragments = [];
+        var lastIndex = 0;
+        regex.lastIndex = 0;
+        while ((match = regex.exec(text)) !== null) {
+          if (match.index > lastIndex) {
+            fragments.push(document.createTextNode(text.slice(lastIndex, match.index)));
+          }
+          var mark = document.createElement('mark');
+          mark.className = 'search-match';
+          mark.textContent = match[0];
+          fragments.push(mark);
+          _searchMatches.push(mark);
+          lastIndex = regex.lastIndex;
+          if (match[0].length === 0) break; // prevent infinite loop on zero-length match
+        }
+        if (fragments.length > 0) {
+          if (lastIndex < text.length) {
+            fragments.push(document.createTextNode(text.slice(lastIndex)));
+          }
+          var wrapper = document.createDocumentFragment();
+          fragments.forEach(function(f) { wrapper.appendChild(f); });
+          parent.replaceChild(wrapper, node);
+        }
+      });
+
+      return _searchMatches.length;
+    }
+
+    function scrollToSearchMatch(index) {
+      _searchMatches.forEach(function(m) { m.classList.remove('current'); });
+      if (index >= 0 && index < _searchMatches.length) {
+        var el = _searchMatches[index];
+        el.classList.add('current');
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function clearSearchHighlight() {
+      document.querySelectorAll('mark.search-match').forEach(function(mark) {
+        var parent = mark.parentNode;
+        if (parent) {
+          parent.replaceChild(document.createTextNode(mark.textContent), mark);
+          parent.normalize();
+        }
+      });
+      _searchMatches = [];
+    }
+  </script>
+</body>
+
+</html>

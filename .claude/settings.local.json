@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /Users/hoangvunam/Documents/SourceCode/mira-markdown -maxdepth 3 -type f \\\\\\(-name *.xcconfig -o -name *.xcworkspace -o -name *.pbxproj \\\\\\))",
+      "Bash(git:*)",
+      "Bash(xcodegen generate:*)",
+      "Bash(xcodebuild build:*)",
+      "Bash(find /Users/hoangvunam/Documents/SourceCode/true-markdown -type f \\\\\\(-name *.xcconfig -o -name *.pbxproj -o -name *.plist -o -name .gitlab-ci.yml -o -name .gitmodules \\\\\\))",
+      "Bash(grep -r com.thtruesoft.mira /Users/hoangvunam/Documents/SourceCode/true-markdown --include=*.plist --include=*.yml --include=*.yaml)",
+      "Bash(mv Targets/AppStore/Mira-AppStore.entitlements Targets/AppStore/TrueMarkdown-AppStore.entitlements)",
+      "Bash(mv Targets/Direct/Mira-Direct.entitlements Targets/Direct/TrueMarkdown-Direct.entitlements)",
+      "Bash(mv MiraMarkdown TrueMarkdown)",
+      "Bash(mv MiraTests TrueMarkdownTests)"
+    ]
+  }
+}
